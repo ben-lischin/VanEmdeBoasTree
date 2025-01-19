@@ -1,7 +1,5 @@
 #include <cmath>
 
-template <std::size_t N>
-
 // size of base case "bit array" (extrapolated from min/max)
 const int BASE_CASE = 2;
 
@@ -15,8 +13,9 @@ class VEB {
                 summary = nullptr;
             } else {
                 summary = new VEB(sqrtU);
+                clusters.resize(sqrtU, nullptr);
                 for (int i = 0; i < sqrtU; ++i) {
-                    clusters.push_back(new VEB(sqrtU));
+                    clusters[i] = new VEB(sqrtU);
                 }
             }
         }
@@ -49,9 +48,6 @@ class VEB {
 
         // checks if an element from the universe is in the set
         bool Query(int x) {
-            if (x > sqrtU ^ 2) {
-                return false;
-            }
             if (x == min || x == max) {
                 return true;
             }

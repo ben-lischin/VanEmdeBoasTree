@@ -2,66 +2,74 @@
 
 template <std::size_t N>
 
-// size of base case bit array
-const int BASE_CASE = 16;
+// size of base case "bit array" (extrapolated from min/max)
+const int BASE_CASE = 2;
 
 // Van Emde Boas tree
 class VEB {
     public:
         // constructor given a fixed universe
-        VEB(int u) : sqrtU(std::sqrt(x)), min(-1), max(-1) { // assume universe size is a perfect square (i.e. even power of 2)
+        VEB(int u) : sqrtU(std::sqrt(u)), min(-1), max(-1) { // assume universe of size 2^(2^n) so all nested vEB objects have perfect-square sizes
             if (u <= BASE_CASE) {
-                // bit array in memory?
+                clusters = new std::vector<VEB*>(0, nullptr);
+                summary = nullptr;
             } else {
-                this->summary = new VEB(this->sqrtU);
-                for (int i = 0; i < this->sqrtU; ++i) {
-                    clusters.push_back(new VEB(this->sqrtU));
+                summary = new VEB(sqrtU);
+                for (int i = 0; i < sqrtU; ++i) {
+                    clusters.push_back(new VEB(sqrtU));
                 }
             }
         }
 
         // destructor
         ~VEB() {
-            delete this->summary;
-            for (auto cluster : this->clusters) {
-                delete cluster; // pointer vs object?
+            delete summary;
+            for (auto& cluster : clusters) {
+                delete cluster;
             }
         }
 
         // adds an element from the universe into the set
         void Insert(int x) {
-            if (this->min == -1) {
-                this->min = this->max = x;
+            if (min == -1) {
+                min = max = x;
                 return;
             }
-            if (x < this->min) {
-                std::swap(x,this->min);
+            if (x < min) {
+                std::swap(x, min);
             }
-            if (x > this->max) {
-                this->max = x;
+            if (x > max) {
+                max = x;
             }
-            if (this->clusters[high(x)]->min = -1) {
-                this->summary.Insert(high(x));
+            if (clusters[high(x)]->min = -1) {
+                summary.Insert(high(x));
             }
-            this->clusters[high(x)].Insert(low(x));
+            return clusters[high(x)].Insert(low(x));
         }
 
         // checks if an element from the universe is in the set
         bool Query(int x) {
-
+            if (x > sqrtU ^ 2) {
+                return false;
+            }
+            if (x == min || x == max) {
+                return true;
+            }
+            // recur if possible, otherwise x not in set
+            return (sqrtU <  BASE_CASE) ? false : clusters[high(x)].Query(low(x));
         }
 
         // returns the smallest y in the set s.t. y ≤ x
         int Successor(int x) {
-            if (x < this->min) {
-                return this->min;
+            if (x < min) {
+                return min;
             }
             i = high(x);
-            if (low(x) < this->clusters[i]->max) {
-                j = this->clusters[i].Successor(low(x));
+            if (low(x) < clusters[i]->max) {
+                j = clusters[i].Successor(low(x));
             } else {
-                i = this->summary.Successor(i);
-                j = this->clusters[i]->min
+                i = summary.Successor(i);
+                j = clusters[i]->min
             }
             return index(i, j);
         }
@@ -80,14 +88,16 @@ class VEB {
 
         // cluster index
         int high(int x) {
-            return std::floor(x / this->sqrtU);
+            return std::floor(x / sqrtU);
         }
+
         // index within cluster
         int low(int x) {
-            return x % this->sqrtU;
+            return x % sqrtU;
         }
+
         // index in universe bit array
         int index(int x) {
-            return high(x) * this->sqrtU + low(x);
+            return high(x) * sqrtU + low(x);
         }
 }

@@ -50,14 +50,15 @@ class VEB {
         }
 
         // adds an element from the universe into the set
+        // space-efficient approach with lazy-loading nested clusters, at the time cost of extra heap allocations during insertions
         void Insert(uint32_t x) {
             if (isEmpty) {
                 min = max = x;
                 isEmpty = false;
+            } else {
+                max = std::max(x, max);
+                min = std::min(x, min);
             }
-
-            max = std::max(x, max);
-            min = std::min(x, min);
                      
             if (u <= BASE_CASE) {
                 return;
@@ -86,42 +87,13 @@ class VEB {
             return clusters[high(x)]->Query(low(x));
         }
 
-        // // returns the smallest y in the set s.t. y ≤ x
-        // std::pair<bool, uint32_t> Successor(uint32_t x) {
-        //     if (!isEmpty) {
-        //         return {false, 0};
-        //     }
-        //     if (x <= min) {
-        //         return {true, min};
-        //     }
-        //     if (u <= BASE_CASE || x > max) {
-        //         return {false, 0};
-        //     }
-
-        //     uint32_t i = high(x);
-        //     uint32_t j;
-        //     if (clusters[i] != nullptr && low(x) <= clusters[i]->Max()) { // successor in same cluster
-        //         auto succ = clusters[i]->Successor(low(x));
-        //         j = succ.second;
-        //     } else { // no successor in this cluster
-        //         auto succ = summary->Successor(i+1); // find next nonempty cluster // ***TODO: should there be the +1 ????????
-        //         if (!succ.first) { // is this necessary?
-        //             return {false, 0};
-        //         }
-        //         i = succ.second;
-        //         j = clusters[i]->Min();
-        //     }
-        //     return {true, index(i, j)};
-
-        // }
-
         // returns the smallest y in the set s.t. y ≤ x
         std::pair<bool, uint32_t> Successor(uint32_t x) {
-            if (u <= BASE_CASE) {
-                return {true, min};
-            }
             if (isEmpty) {
                 return {false, 0};
+            }
+            if (u <= BASE_CASE && x == max) {
+                return {true, max};
             }
             if (x <= min) {
                 return {true, min};
@@ -131,23 +103,18 @@ class VEB {
             uint32_t j;
             if (clusters[i] != nullptr && low(x) <= clusters[i]->Max()) { // successor in same cluster
                 auto succ = clusters[i]->Successor(low(x));
-                if (!succ.first) {
-                    return {false, 0};
-                }
+                // successor is known to exist, no need to check
                 j = succ.second;
             } else { // no successor in this cluster
-                if (i >= summary->Max()) {
+                if (i >= summary->Max()) { // no next nonempty clusters
                     return {false, 0};
                 }
-                auto succ = summary->Successor(i+1); // find next nonempty cluster // ***TODO: should there be the +1 ????????
-                if (!succ.first) { // is this necessary?
-                    return {false, 0};
-                }
+                auto succ = summary->Successor(i+1); // find next nonempty cluster
+                // successor is known to exist, no need to check
                 i = succ.second;
                 j = clusters[i]->Min();
             }
             return {true, index(i, j)};
-
         }
 
     private:

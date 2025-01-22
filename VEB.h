@@ -18,18 +18,11 @@ class VEB {
                 summary = nullptr;
                 clusters = std::vector<VEB*>(0, nullptr);
             } else {
-                // // sqrt(u), rounded up to the nearest power of 2
-                // clusterCount = static_cast<uint32_t>(exp2(std::ceil(log2(u)/2)));
-                // // sqrt(u), rounded down to the nearest power of 2
-                // clusterSize = static_cast<uint32_t>(exp2(std::floor(log2(u)/2)));
-                // clusterCount = clusterSize = std::sqrt(u);
-                clusterCount = clusterSize = exp2(std::ceil(log2(u)/2)); // if using this rounding method with cluster size = count... TODO: remove fields and use a method for this sqrt val
-                // allocate memory for recursion
-                summary = new VEB(clusterSize);
-                clusters = std::vector<VEB*>(clusterCount, nullptr);
-                // for (uint32_t i = 0; i < clusterCount; ++i) { // might have to remove here and do lazy loading as we recur in the methods? (just insert?)
-                //     clusters[i] = new VEB(clusterSize);
-                // }
+                // sqrt(u), rounded up to the nearest power of 2
+                sqrtU = exp2(std::ceil(log2(u)/2));
+                
+                summary = new VEB(sqrtU);
+                clusters = std::vector<VEB*>(sqrtU, nullptr);
             }
         }
 
@@ -55,6 +48,8 @@ class VEB {
             if (isEmpty) {
                 min = max = x;
                 isEmpty = false;
+            } else if (x == min || x == max) { // already inserted
+                return;
             } else {
                 max = std::max(x, max);
                 min = std::min(x, min);
@@ -67,14 +62,37 @@ class VEB {
             uint32_t i = high(x);
             if (clusters[i] == nullptr) { 
                 summary->Insert(i);
-                clusters[i] = new VEB(clusterSize); // lazy loading of nested clusters, as they need to be entered
+                clusters[i] = new VEB(sqrtU); // lazy loading of nested clusters, as they need to be entered
             }
             clusters[i]->Insert(low(x));
         }
 
+        // // removes an element in the universe from the set
+        // void Delete(uint32_t x) {
+        //     if (isEmpty || (!isEmpty && (x < min || x > max))) { // nothing to delete
+        //         return;
+        //     }
+        //     if (x == min && x == max) { // x is only item in this cluster
+        //         isEmpty = true;
+        //         min = max = 0;
+        //         return;
+        //         // can also make the clusters and summary nullptrs like reinforcing lazy loading
+        //         // is it possible to make this cluster itself nullptr in the parent cluster?
+        //     }
+        //     if (x == min) {
+        //         // min = next smallest
+                
+        //     }
+        //     if (x == max) {
+        //         // max = next largest
+        //     }
+        //     // x within some nested cluster
+        //     clusters[high(x)]->Delete(low(x));
+        // }
+
         // checks if an element from the universe is in the set
         bool Query(uint32_t x) {
-            if (isEmpty) {
+            if (isEmpty) { // for highest-level empty tree
                 return false;
             }
             if (x == min || x == max) {
@@ -120,10 +138,8 @@ class VEB {
     private:
         // current-level universe size
         uint32_t u;
-        // number of next-level clusters
-        uint32_t clusterCount;
-        // size of next-level clusters
-        uint32_t clusterSize;
+        // number of next-level clusters; size of next-level clustrs
+        uint32_t sqrtU;
         // nested clusters
         std::vector<VEB*> clusters;
         // highest-level summary struct, 
@@ -137,17 +153,17 @@ class VEB {
 
         // cluster index
         uint32_t high(uint32_t x) {
-            return std::floor(x / clusterSize);
+            return std::floor(x / sqrtU);
         }
 
         // index within cluster
         uint32_t low(uint32_t x) {
-            return x % clusterSize;
+            return x % sqrtU;
         }
 
         // index in universe bit array (ith cluster, jth index in cluster)
         uint32_t index(uint32_t i, uint32_t j) {
-            return i * clusterSize + j;
+            return i * sqrtU + j;
         }
 };
 

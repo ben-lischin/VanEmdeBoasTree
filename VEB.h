@@ -19,6 +19,7 @@ class VEB {
                 clusters = std::vector<VEB*>(0, nullptr);
             } else {
                 // sqrt(u), rounded up to the nearest power of 2
+                // rounding necessary since initial universe is UINT32_MAX = 2^32 - 1, not 2^32; all recursive universes will be perfect square powers of 2
                 sqrtU = exp2(std::ceil(log2(u)/2));
                 
                 summary = new VEB(sqrtU);

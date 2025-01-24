@@ -45,11 +45,11 @@ int main(int argc, char** argv) {
 	}
 	safe_rand_bytes((unsigned char *)out_numbers, sizeof(*out_numbers) * N);
 
+	high_resolution_clock::time_point t1, t2;
+
 	std::cout << "Testing Binary Search Tree..." << std::endl;
 	// Create a bst using std::set
 	std::set<uint32_t> bst;
-	high_resolution_clock::time_point t1, t2;
-
 	// Insert N items from in_numbers
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N; ++i) {
@@ -97,24 +97,24 @@ int main(int argc, char** argv) {
 	for (uint32_t i = 0; i < N; ++i) {
 		auto ret = veb.Query(in_numbers[i]);
 		if (ret == false) {
-			std::cerr << "Query in VEB failed. Item: " + std::to_string(in_numbers[i]) + "\n";
+			std::cerr << "query in VEB failed. Item: " + std::to_string(in_numbers[i]) + "\n";
 			exit(0);
 		}
 	}
 	t2 = high_resolution_clock::now();
-	std::cout << "Time to Query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+	std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
 	// N Successor queries from out_numbers
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N; ++i) {
 		auto succ = veb.Successor(out_numbers[i]);
 		if (succ.first == true && succ.second < out_numbers[i]) {
-			std::cerr << "Successor query in VEB failed. Item: " + std::to_string(out_numbers[i]) + " Successor result: " + std::to_string(succ.second) + "\n";
+			std::cerr << "successor query in vEB failed. Item: " + std::to_string(out_numbers[i]) + " Successor result: " + std::to_string(succ.second) + "\n";
 			exit(0);
 		}
 	}
 	t2 = high_resolution_clock::now();
-	std::cout << "Time to Successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
 	return 0;
 }

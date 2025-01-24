@@ -20,6 +20,7 @@ int main() {
     assert(veb.Query(30000) == false);
     assert(veb.Query(55000) == false);
     veb.Insert(1);
+    veb.Insert(1);
     veb.Insert(6);
     veb.Insert(7);
     veb.Insert(100);

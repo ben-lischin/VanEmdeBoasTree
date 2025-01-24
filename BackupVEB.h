@@ -3,88 +3,31 @@
 
 #include <vector>
 #include <cmath>
-#include <bitset>
+#include <iostream>
 
+///////////////////////////
+// FULL RECURSION METHOD //
+///////////////////////////
 
-// size of base case bitset
-const uint32_t BASE_CASE = 16;
+// size of base case "bit array" (extrapolated from min/max)
+const uint32_t BASE_CASE = 2;
 
-class VEBInterface {
-    public:
-        virtual ~VEBInterface() {}
-        virtual void Insert(uint32_t x) = 0;
-        virtual bool Query(uint32_t x) = 0;
-        virtual std::pair<bool, uint32_t> Successor(uint32_t x) = 0;
-        virtual uint32_t Min() = 0;
-        virtual uint32_t Max() = 0;
-};
-
-// with a base case universe size of 16, stop recurring and linearly search/manipulate a bitset
-class VEB_Base : public VEBInterface {
-    public:
-        VEB_Base() : bitArray(0), min(0), max(0), isEmpty(true) {}
-
-        uint32_t Min() override {
-            return min;
-        }
-
-        uint32_t Max() override {
-            return max;
-        }
-
-        void Insert(uint32_t x) override {
-            bitArray.set(x);
-            if (isEmpty) {
-                min = max = x;
-                isEmpty = false;
-                return;
-            }
-            if (x < min) {
-                min = x;
-            } else if (x > max) {
-                max = x;
-            }
-            // or should we not maintain a min/max and just loop??
-        }
-
-        bool Query(uint32_t x) override {
-            return bitArray.test(x);
-        }
-
-        std::pair<bool, uint32_t> Successor(uint32_t x) override {
-            if (x > max)  {
-                return {false, 0};
-            }
-            for (uint32_t i = x; i < 16; ++i) {
-                if (bitArray.test(i)) {
-                    return {true, i};
-                }
-            }
-            return {false, 0};
-        }
-
-    private:
-        // base case bit array
-        std::bitset<BASE_CASE> bitArray;
-        uint32_t min;
-        uint32_t max;
-        bool isEmpty;
-
-};
-
-// recursive Van Emde Boas tree
-class VEB : public VEBInterface {
+// Van Emde Boas tree
+class VEB {
     public:
         // constructor given a fixed universe
-        // assume universe of size 2^(2^n) so all nested vEB objects have perfect-square sizes
-        // also assume we will not construct the original vEB tree with base case size 16
-        VEB(uint32_t u) : u(u), min(0), max(0), isEmpty(true) {
-            // sqrt(u), rounded up to the nearest power of 2
-            // rounding necessary since initial universe is UINT32_MAX = 2^32 - 1, not 2^32; all recursive universes will be perfect square powers of 2
-            sqrtU = std::exp2(std::ceil(std::log2(u)/2));
-            
-            summary = VEBFactory(sqrtU);
-            clusters = std::vector<VEBInterface*>(sqrtU, nullptr);
+        VEB(uint32_t u) : u(u), min(0), max(0), isEmpty(true) { // assume universe of size 2^(2^n) so all nested vEB objects have perfect-square sizes
+            if (u <= BASE_CASE) {
+                summary = nullptr;
+                clusters = std::vector<VEB*>(0, nullptr);
+            } else {
+                // sqrt(u), rounded up to the nearest power of 2
+                // rounding necessary since initial universe is UINT32_MAX = 2^32 - 1, not 2^32; all recursive universes will be perfect square powers of 2
+                sqrtU = exp2(std::ceil(log2(u)/2));
+                
+                summary = new VEB(sqrtU);
+                clusters = std::vector<VEB*>(sqrtU, nullptr);
+            }
         }
 
         // destructor
@@ -95,12 +38,12 @@ class VEB : public VEBInterface {
             }
         }
 
-        uint32_t Min() {
-            return min;
-        }
-
         uint32_t Max() {
             return max;
+        }
+
+        uint32_t Min() {
+            return min;
         }
 
         // adds an element from the universe into the set
@@ -111,16 +54,19 @@ class VEB : public VEBInterface {
                 isEmpty = false;
             } else if (x == min || x == max) { // already inserted
                 return;
-            } else if (x < min ) {
-                min = x;
-            } else if (x > max) {
-                max = x;
+            } else {
+                max = std::max(x, max);
+                min = std::min(x, min);
+            }
+                     
+            if (u <= BASE_CASE) {
+                return;
             }
 
             uint32_t i = high(x);
             if (clusters[i] == nullptr) { 
                 summary->Insert(i);
-                clusters[i] = VEBFactory(sqrtU); // lazy loading of nested clusters, as they need to be entered
+                clusters[i] = new VEB(sqrtU); // lazy loading of nested clusters, as they need to be entered
             }
             clusters[i]->Insert(low(x));
         }
@@ -157,7 +103,7 @@ class VEB : public VEBInterface {
                 return true;
             }
             // recur if possible, otherwise x not in set
-            if (clusters[high(x)] == nullptr) {
+            if (u <= BASE_CASE || clusters[high(x)] == nullptr) {
                 return false;
             }
             return clusters[high(x)]->Query(low(x));
@@ -167,6 +113,9 @@ class VEB : public VEBInterface {
         std::pair<bool, uint32_t> Successor(uint32_t x) {
             if (isEmpty) {
                 return {false, 0};
+            }
+            if (u <= BASE_CASE && x == max) {
+                return {true, max};
             }
             if (x <= min) {
                 return {true, min};
@@ -196,9 +145,9 @@ class VEB : public VEBInterface {
         // number of next-level clusters; size of next-level clustrs
         uint32_t sqrtU;
         // nested clusters
-        std::vector<VEBInterface*> clusters;
+        std::vector<VEB*> clusters;
         // highest-level summary struct, 
-        VEBInterface* summary;
+        VEB* summary;
         // minimum occupied index in the cluster
         uint32_t min;
         // maximum occupied index in the cluster
@@ -219,14 +168,6 @@ class VEB : public VEBInterface {
         // index in universe bit array (ith cluster, jth index in cluster)
         uint32_t index(uint32_t i, uint32_t j) {
             return i * sqrtU + j;
-        }
-
-        VEBInterface* VEBFactory(uint32_t u) {
-            if (u <= BASE_CASE) {
-                return new VEB_Base();
-            } else {
-                return new VEB(u);
-            }
         }
 };
 

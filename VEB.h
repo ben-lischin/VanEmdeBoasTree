@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <bitset>
+#include <iostream>
 
 
 // size of base case bitset
@@ -13,12 +14,13 @@ class VEBInterface {
     public:
         virtual ~VEBInterface() {}
         virtual void Insert(uint32_t x) = 0;
-        // virtual void Delete(uint32_t x) = 0;
+        virtual void Delete(uint32_t x) = 0;
         virtual bool Query(uint32_t x) = 0;
         virtual std::pair<bool, uint32_t> Successor(uint32_t x) = 0;
         virtual std::pair<bool, uint32_t> Predecessor(uint32_t x) = 0;
         virtual uint32_t Min() = 0;
         virtual uint32_t Max() = 0;
+        virtual bool IsEmpty() = 0;
 };
 
 // with a base case universe size, stop recurring and linearly search/manipulate a bitset
@@ -44,13 +46,17 @@ class VEB_Base : public VEBInterface {
             return 0;
         }
 
+        bool IsEmpty() override {
+            return bitArray.none();
+        }
+
         void Insert(uint32_t x) override {
             bitArray.set(x);
         }
 
-        // void Delete(uint32_t x) override {
-        //     bitArray.reset(x);
-        // }
+        void Delete(uint32_t x) override {
+            bitArray.reset(x);
+        }
 
         bool Query(uint32_t x) override {
             return bitArray.test(x);
@@ -109,72 +115,103 @@ class VEB : public VEBInterface {
             }
         }
 
-        uint32_t Min() {
+        uint32_t Min() override {
             return min;
         }
 
-        uint32_t Max() {
+        uint32_t Max() override {
             return max;
+        }
+
+        bool IsEmpty() override {
+            return isEmpty;
         }
 
         // adds an element from the universe into the set
         // space-efficient approach with lazy-loading nested clusters, at the time cost of extra memory allocations during insertions
-        void Insert(uint32_t x) {
+        void Insert(uint32_t x) override {
             if (isEmpty) {
                 min = max = x;
                 isEmpty = false;
+                return; // ******????
             } else if (x == min || x == max) { // already inserted
                 return;
-            } else if (x < min ) {
-                min = x;
+            } else if (x < min ) { // lazy propogation of min: summary min is staggered one update behind this min
+                std::swap(x, min);
             } else if (x > max) {
                 max = x;
             }
 
             uint32_t i = high(x);
-            if (clusters[i] == nullptr) { 
-                summary->Insert(i);
-                clusters[i] = VEBFactory(sqrtU); // lazy loading of nested clusters, as they need to be entered
+            if (clusters[i] == nullptr) {
+                clusters[i] = VEBFactory(sqrtU);
+                summary->Insert(i); // called on average once every sqrt(u) inserts at a level
             }
             clusters[i]->Insert(low(x));
         }
 
         // removes an element in the universe from the set
-        // void Delete(uint32_t x) {
-        //     if (isEmpty || (!isEmpty && (x < min || x > max))) { // nothing to delete
+        void Delete(uint32_t x) override {
+            return;
+        }
+        // // removes an element in the universe from the set
+        // void Delete(uint32_t x) override {
+        //     std::cout << "** x = " << x << std::endl;
+
+        //     if (isEmpty || x < min || x > max) { // nothing to delete
+        //         std::cout << "nothing to delete" << std::endl;
         //         return;
         //     }
         //     if (x == min && x == max) { // x is only item in this cluster
+        //         std::cout << "removing only item: " << index(high(x), low(x)) << std::endl;
         //         min = max = 0;
         //         isEmpty = true;
+
+        //         // maintain lazy loading
+        //         delete summary; // TODO: remove?
+        //         summary = VEBFactory(std::pow(sqrtU, 2));
+        //         delete clusters[high(x)];
+        //         clusters[high(x)] = nullptr;
         //         return;
-        //         // can also make the clusters and summary nullptrs like reinforcing lazy loading
-        //         // is it possible to make this cluster itself nullptr in the parent cluster?
         //     }
+            
         //     if (x == min) {
-        //         // min = next smallest
-        //         auto succ = Successor(x);
-        //         if (!succ.first) {
-        //             min = 0;
-        //             isEmpty = true;
-        //         } else {
-        //             min = succ.second;
+        //         uint32_t j = summary->Min();
+        //         if (clusters[j] == nullptr) { //
+        //             std::cout << "bruh" << std::endl; //
         //         }
-        //     } else if (x == max) {
-        //         auto prev = Predecessor(x);
-        //         if (!prev.first) {
-        //             max = 0;
-        //             isEmpty = true;
+        //         x = min = index(j, clusters[j]->Min());
+        //         std::cout << "x = min. Next min = " << x << std::endl;
+
+        //     }
+        //     uint32_t i = high(x);
+        //     if (clusters[i] == nullptr) { // deleting an element in an empty cluster
+        //         std::cout << "deleting from empty cluster" << std::endl;
+        //         return;
+        //     }
+        //     clusters[i]->Delete(low(x));
+        //     if (clusters[i] == nullptr || clusters[i]->IsEmpty()) { // || isempty
+        //         delete clusters[i]; //
+        //         clusters[i] = nullptr; // 
+        //         summary->Delete(i);
+        //     }
+        //     if (x == max) {
+        //         if (summary->IsEmpty()) {
+        //             std::cout << "removing max -> this veb empty" << std::endl;
+        //             max = min;
         //         } else {
-        //             max = prev.second;
+        //             uint32_t j = summary->Max();
+        //             if (clusters[j] == nullptr) { //
+        //                 std::cout << "poop" << std::endl; //
+        //             }
+        //             max = index(j, clusters[j]->Max());
+        //             std::cout << "removing max. Next max = " << max << std::endl;
         //         }
         //     }
-        //     // x within some nested cluster
-        //     clusters[high(x)]->Delete(low(x));
         // }
 
         // checks if an element from the universe is in the set
-        bool Query(uint32_t x) {
+        bool Query(uint32_t x) override{
             if (isEmpty) { // for highest-level empty tree
                 return false;
             }
@@ -189,7 +226,7 @@ class VEB : public VEBInterface {
         }
 
         // returns the smallest y in the set s.t. y ≤ x
-        std::pair<bool, uint32_t> Successor(uint32_t x) {
+        std::pair<bool, uint32_t> Successor(uint32_t x) override {
             if (isEmpty) {
                 return {false, 0};
             }
@@ -215,7 +252,7 @@ class VEB : public VEBInterface {
             return {true, index(i, j)};
         }
 
-        std::pair<bool, uint32_t> Predecessor(uint32_t x) {
+        std::pair<bool, uint32_t> Predecessor(uint32_t x) override {
             if (isEmpty) {
                 return {false, 0};
             }

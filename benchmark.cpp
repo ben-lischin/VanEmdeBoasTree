@@ -47,40 +47,40 @@ int main(int argc, char** argv) {
 
 	high_resolution_clock::time_point t1, t2;
 
-	// std::cout << "Testing Binary Search Tree..." << std::endl;
-	// // Create a bst using std::set
-	// std::set<uint32_t> bst;
-	// // Insert N items from in_numbers
-	// t1 = high_resolution_clock::now();
-	// for (uint32_t i = 0; i < N; ++i) {
-	// 	bst.insert(in_numbers[i]);
-	// }
-	// t2 = high_resolution_clock::now();
-	// std::cout << "Time to insert " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+	std::cout << "Testing Binary Search Tree..." << std::endl;
+	// Create a bst using std::set
+	std::set<uint32_t> bst;
+	// Insert N items from in_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		bst.insert(in_numbers[i]);
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to insert " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
-	// // Query N items from in_numbers
-	// t1 = high_resolution_clock::now();
-	// for (uint32_t i = 0; i < N; ++i) {
-	// 	auto ret = bst.find(in_numbers[i]);
-	// 	if (ret == bst.end()) {
-	// 		std::cerr << "Find in BST failed. Item: " + std::to_string(in_numbers[i]) + "\n";
-	// 		exit(0);
-	// 	}
-	// }
-	// t2 = high_resolution_clock::now();
-	// std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+	// Query N items from in_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		auto ret = bst.find(in_numbers[i]);
+		if (ret == bst.end()) {
+			std::cerr << "Find in BST failed. Item: " + std::to_string(in_numbers[i]) + "\n";
+			exit(0);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
-	// // N Successor queries from out_numbers
-	// t1 = high_resolution_clock::now();
-	// for (uint32_t i = 0; i < N; ++i) {
-	// 	auto ret = bst.lower_bound(out_numbers[i]);
-	// 	if (ret != bst.end() && *ret < out_numbers[i]) {
-	// 		std::cerr << "successor query in BST failed. Item: " + std::to_string(out_numbers[i]) + " Successor: " + std::to_string(*ret) + "\n";
-	// 		exit(0);
-	// 	}
-	// }
-	// t2 = high_resolution_clock::now();
-	// std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+	// N Successor queries from out_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		auto ret = bst.lower_bound(out_numbers[i]);
+		if (ret != bst.end() && *ret < out_numbers[i]) {
+			std::cerr << "successor query in BST failed. Item: " + std::to_string(out_numbers[i]) + " Successor: " + std::to_string(*ret) + "\n";
+			exit(0);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
 	std::cout << "Testing Van Emde Boas Tree..." << std::endl;
 	VEB veb(UINT32_MAX); // |U| = 2^32

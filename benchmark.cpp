@@ -82,6 +82,19 @@ int main(int argc, char** argv) {
 	t2 = high_resolution_clock::now();
 	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
+	// Delete N items from bst
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+        bst.erase(in_numbers[i]);
+	}
+	if (!bst.empty()) {
+		std::cerr << "delete failed to clear tree\n";
+		exit(0);
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to delete " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
+
+
 	std::cout << "\nTesting Van Emde Boas Tree..." << std::endl;
 	VEB veb(UINT32_MAX); // |U| = 2^32
 	

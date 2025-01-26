@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 	t2 = high_resolution_clock::now();
 	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
 
-	std::cout << "Testing Van Emde Boas Tree..." << std::endl;
+	std::cout << "\nTesting Van Emde Boas Tree..." << std::endl;
 	VEB veb(UINT32_MAX); // |U| = 2^32
 	
 	// Insert N items from in_numbers

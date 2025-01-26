@@ -2,7 +2,6 @@
 #include <vector>
 #include <cmath>
 #include <bitset>
-#include <iostream>
 
 /////////////////////////////
 /////// Base Case VEB ///////
@@ -75,8 +74,8 @@ std::pair<bool, uint32_t> VEB_Base::Successor(uint32_t x) {
 /////////////////////////////
 
 // constructor given a fixed universe
-// assume universe of size 2^(2^n) so all nested vEB objects have perfect-square sizes
-// also assume we will not construct the original vEB tree with base case size 16
+// assume universe of size 2^(2^n) so all nested VEB objects have perfect-square sizes
+// also assume we will not construct the original VEB tree with base case size 16
 VEB::VEB(uint32_t u) : min(0), max(0), isEmpty(true) {
     // sqrt(u), rounded up to the nearest power of 2
     // rounding necessary since initial universe is UINT32_MAX = 2^32 - 1, not 2^32; all recursive universes will be perfect square powers of 2
@@ -113,7 +112,8 @@ void VEB::Insert(uint32_t x) {
         return;
     } else if (x == min || x == max) { // already inserted
         return;
-    } else if (x < min ) { // lazy propogation of min: summary min is staggered one update behind this min
+    } else if (x < min ) {
+        // lazy propogation of min: summary min is staggered one update behind this min
         std::swap(x, min);
     } else if (x > max) {
         max = x;
@@ -122,7 +122,7 @@ void VEB::Insert(uint32_t x) {
     uint32_t i = high(x);
     if (clusters[i] == nullptr) {
         clusters[i] = VEBFactory(sqrtU);
-        summary->Insert(i); // called on average once every sqrt(u) inserts at a level
+        summary->Insert(i);
     }
     clusters[i]->Insert(low(x));
 }
@@ -147,7 +147,7 @@ void VEB::Delete(uint32_t x) {
         return;
     }         
     clusters[i]->Delete(low(x));
-    if (clusters[i] == nullptr ||  clusters[i]->IsEmpty()) {
+    if (clusters[i] == nullptr ||  clusters[i]->IsEmpty()) { // if the above delete emptied the cluster
         summary->Delete(i);
         delete clusters[i];
         clusters[i] = nullptr;

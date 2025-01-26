@@ -82,7 +82,7 @@ int main() {
     assert(veb.Max() == 0);
 
 
-    // extra test sequence
+    // extra test sequence after manipulation
     assert(veb.Query(0) == false);
     assert(veb.Successor(0).first == 0);
     assert(veb.Query(65535) == false);

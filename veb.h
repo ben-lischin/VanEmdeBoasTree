@@ -4,7 +4,6 @@
 #include <vector>
 #include <cmath>
 #include <bitset>
-#include <iostream>
 
 
 // size of base case bitset

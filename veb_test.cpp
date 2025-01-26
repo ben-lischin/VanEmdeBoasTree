@@ -1,10 +1,88 @@
-#include "VEB.h"
+#include "veb.h"
 #include <iostream>
 #include <cassert>
+
 
 int main() {
     VEB veb(UINT32_MAX);
 
+    // initial empty tree
+    assert(veb.IsEmpty());
+    assert(veb.Min() == 0);
+    assert(veb.Max() == 0);
+
+    // insert + query an element
+    assert(!veb.Query(5));
+    veb.Insert(5);
+    assert(!veb.IsEmpty());
+    assert(veb.Min() == 5);
+    assert(veb.Max() == 5);
+    assert(veb.Query(5));
+
+    // insert existing item
+    veb.Insert(5);
+    assert(!veb.IsEmpty());
+    assert(veb.Min() == 5);
+    assert(veb.Max() == 5);
+    assert(veb.Query(5));
+
+    // multiple insertions
+    veb.Insert(3);
+    veb.Insert(3);
+    veb.Insert(12345);
+    veb.Insert(7089);
+    assert(veb.Min() == 3);
+    assert(veb.Max() == 12345);
+
+    // successor/predecessor
+    auto succ = veb.Successor(0);
+    // auto pred = veb.Predecessor(123456);
+    assert(succ.first && succ.second == 3);
+    // assert(pred.first && pred.second == 12345);
+    succ = veb.Successor(123);
+    // pred = veb.Predecessor(12344);
+    assert(succ.first && succ.second == 7089);
+    // assert(pred.first && pred.second == 7089);
+
+    // successor/predecessor on item in tree
+    succ = veb.Successor(7089);
+    // pred = veb.Predecessor(7089);
+    assert(succ.first && succ.second == 7089);
+    // assert(pred.first && pred.second == 7089);
+
+    // no successor/predecessor
+    succ = veb.Successor(12346);
+    // pred = veb.Predecessor(2);
+    assert(!succ.first && succ.second == 0);
+    // assert(!pred.first && pred.second == 0);
+
+    // Test boundary conditions
+    veb.Insert(0);
+    veb.Insert(UINT32_MAX);
+    assert(veb.Min() == 0);
+    assert(veb.Max() == UINT32_MAX);
+
+    // delete deletion
+    veb.Delete(0);
+    assert(!veb.Query(0));
+    assert(veb.Min() == 3);
+    assert(veb.Max() == UINT32_MAX);
+
+    // delete an item not in the tree
+    veb.Delete(100);
+
+    // delete all elements
+    veb.Delete(3);
+    veb.Delete(5);
+    veb.Delete(7089);
+    veb.Delete(12345);
+    veb.Delete(UINT32_MAX);
+    assert(veb.IsEmpty());
+    assert(veb.Min() == 0);
+    assert(veb.Max() == 0);
+
+
+    // extra test sequence
     assert(veb.Query(0) == false);
     assert(veb.Successor(0).first == 0);
     assert(veb.Query(65535) == false);

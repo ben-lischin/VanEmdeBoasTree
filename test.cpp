@@ -34,35 +34,27 @@ int main() {
     assert(veb.Min() == 3);
     assert(veb.Max() == 12345);
 
-    // successor/predecessor
+    // successor
     auto succ = veb.Successor(0);
-    // auto pred = veb.Predecessor(123456);
     assert(succ.first && succ.second == 3);
-    // assert(pred.first && pred.second == 12345);
     succ = veb.Successor(123);
-    // pred = veb.Predecessor(12344);
     assert(succ.first && succ.second == 7089);
-    // assert(pred.first && pred.second == 7089);
 
-    // successor/predecessor on item in tree
+    // successor on item in tree
     succ = veb.Successor(7089);
-    // pred = veb.Predecessor(7089);
     assert(succ.first && succ.second == 7089);
-    // assert(pred.first && pred.second == 7089);
 
-    // no successor/predecessor
+    // no successor
     succ = veb.Successor(12346);
-    // pred = veb.Predecessor(2);
     assert(!succ.first && succ.second == 0);
-    // assert(!pred.first && pred.second == 0);
 
-    // Test boundary conditions
+    // min/max value
     veb.Insert(0);
     veb.Insert(UINT32_MAX);
     assert(veb.Min() == 0);
     assert(veb.Max() == UINT32_MAX);
 
-    // delete deletion
+    // delete
     veb.Delete(0);
     assert(!veb.Query(0));
     assert(veb.Min() == 3);

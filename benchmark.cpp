@@ -129,19 +129,7 @@ int main(int argc, char** argv) {
 	}
 	t2 = high_resolution_clock::now();
 	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
-
-	// // N Predecessor queries from out_numbers
-	// t1 = high_resolution_clock::now();
-	// for (uint32_t i = 0; i < N; ++i) {
-	// 	auto pred = veb.Predecessor(out_numbers[i]);
-	// 	if (pred.first == true && pred.second > out_numbers[i]) {
-	// 		std::cerr << "predecessor query in vEB failed. Item: " + std::to_string(out_numbers[i]) + " Predecessor result: " + std::to_string(pred.second) + "\n";
-	// 		exit(0);
-	// 	}
-	// }
-	// t2 = high_resolution_clock::now();
-	// std::cout << "Time to predecessor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs\n";
-
+	
 	// Delete N items from in_numbers
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N; ++i) {

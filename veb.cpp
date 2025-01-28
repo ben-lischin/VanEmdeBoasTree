@@ -3,6 +3,7 @@
 #include <cmath>
 #include <bitset>
 
+
 /////////////////////////////
 /////// Base Case VEB ///////
 /////////////////////////////
@@ -54,19 +55,6 @@ std::pair<bool, uint32_t> VEB_Base::Successor(uint32_t x) {
     }
     return {false, 0};
 }
-
-// std::pair<bool, uint32_t> VEB_Base::Predecessor(uint32_t x) {
-//     if (x < Min())  {
-//         return {false, 0};
-//     }
-//     for (int i = x; i >= 0; --i) { // int to prevent unsigned underflow
-//         if (bitArray.test(i)) {
-//             return {true, i};
-//         }
-//     }
-//     return {false, 0};
-// }
-
 
 
 /////////////////////////////
@@ -143,7 +131,7 @@ void VEB::Delete(uint32_t x) {
     }
 
     uint32_t i = high(x);
-    if (clusters[i] == nullptr) { // if in a middle non-existant cluster
+    if (clusters[i] == nullptr) { // if x in a middle non-existant cluster
         return;
     }         
     clusters[i]->Delete(low(x));
@@ -202,32 +190,6 @@ std::pair<bool, uint32_t> VEB::Successor(uint32_t x) {
     }
     return {true, index(i, j)};
 }
-
-// std::pair<bool, uint32_t> VEB::Predecessor(uint32_t x) {
-//     if (isEmpty) {
-//         return {false, 0};
-//     }
-//     if (x >= max) {
-//         return {true, max};
-//     }
-
-//     uint32_t i = high(x);
-//     uint32_t j;
-//     if (clusters[i] != nullptr && low(x) >= clusters[i]->Min()) { // predecessor in same cluster
-//         auto pred = clusters[i]->Predecessor(low(x));
-//         // predecessor is known to exist, no need to check
-//         j = pred.second;
-//     } else { // no predecessor in this cluster
-//         if (i <= summary->Min()) { // no prev nonempty clusters
-//             return {false, 0};
-//         }
-//         auto pred = summary->Predecessor(i-1); // find prev nonempty cluster
-//         // predecessor is known to exist, no need to check
-//         i = pred.second;
-//         j = clusters[i]->Max();
-//     }
-//     return {true, index(i, j)};
-// }
 
 uint32_t VEB::high(uint32_t x) {
     return std::floor(x / sqrtU);

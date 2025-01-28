@@ -20,8 +20,6 @@ class VEBInterface {
         virtual bool Query(uint32_t x) = 0;
         // finds the smallest y in the tree s.t. y ≥ x, if any
         virtual std::pair<bool, uint32_t> Successor(uint32_t x) = 0;
-        // // finds the greatest y in the tree s.t. y ≤ x, if any
-        // virtual std::pair<bool, uint32_t> Predecessor(uint32_t x) = 0;
         // returns the minimum element in the tree
         virtual uint32_t Min() = 0;
         // returns the maximum element in the tree
@@ -41,7 +39,6 @@ class VEB_Base : public VEBInterface {
         void Delete(uint32_t x) override;
         bool Query(uint32_t x) override;
         std::pair<bool, uint32_t> Successor(uint32_t x) override;
-        // std::pair<bool, uint32_t> Predecessor(uint32_t x) override;
 
     private:
         // base case bit array
@@ -62,7 +59,6 @@ class VEB : public VEBInterface {
         void Delete(uint32_t x) override;
         bool Query(uint32_t x) override;
         std::pair<bool, uint32_t> Successor(uint32_t x) override;
-        // std::pair<bool, uint32_t> Predecessor(uint32_t x) override;
 
     private:
         // number of next-level clusters; size of next-level clustrs

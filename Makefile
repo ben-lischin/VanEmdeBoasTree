@@ -1,4 +1,4 @@
-all: test benchmark
+all: benchmark
 
 CC = g++
 OPT = -g -flto -Ofast

@@ -7,7 +7,7 @@
 
 
 // size of base case bitset
-const uint32_t BASE_CASE = 16;
+const uint32_t BASE_CASE = 256;
 
 class VEBInterface {
     public:

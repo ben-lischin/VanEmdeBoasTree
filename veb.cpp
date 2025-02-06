@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <bitset>
+#include <iostream>
 
 
 /////////////////////////////
@@ -45,10 +46,7 @@ bool VEB_Base::Query(uint32_t x) {
 }
 
 std::pair<bool, uint32_t> VEB_Base::Successor(uint32_t x) {
-    if (x > Max())  {
-        return {false, 0};
-    }
-    for (uint32_t i = x; i < 16; ++i) {
+    for (uint32_t i = x; i < BASE_CASE; ++i) {
         if (bitArray.test(i)) {
             return {true, i};
         }
@@ -63,7 +61,7 @@ std::pair<bool, uint32_t> VEB_Base::Successor(uint32_t x) {
 
 // constructor given a fixed universe
 // assume universe of size 2^(2^n) so all nested VEB objects have perfect-square sizes
-// also assume we will not construct the original VEB tree with base case size 16
+// also assume we will not construct the original VEB tree with base case size 256
 VEB::VEB(uint32_t u) : min(0), max(0), isEmpty(true) {
     // sqrt(u), rounded up to the nearest power of 2
     // rounding necessary since initial universe is UINT32_MAX = 2^32 - 1, not 2^32; all recursive universes will be perfect square powers of 2
@@ -75,7 +73,7 @@ VEB::VEB(uint32_t u) : min(0), max(0), isEmpty(true) {
 
 VEB::~VEB() {
     delete summary;
-    for (auto& cluster : clusters) {
+    for (auto cluster : clusters) {
         delete cluster;
     }
 }
@@ -184,6 +182,9 @@ std::pair<bool, uint32_t> VEB::Successor(uint32_t x) {
             return {false, 0};
         }
         auto succ = summary->Successor(i+1); // find next nonempty cluster
+        if (!succ.first) {
+            return {false, 0};
+        }
         // successor is known to exist, no need to check
         i = succ.second;
         j = clusters[i]->Min();
@@ -212,5 +213,3 @@ VEBInterface* VEB::VEBFactory(uint32_t u) {
         return new VEB(u);
     }
 }
-
-        

@@ -182,9 +182,6 @@ std::pair<bool, uint32_t> VEB::Successor(uint32_t x) {
             return {false, 0};
         }
         auto succ = summary->Successor(i+1); // find next nonempty cluster
-        if (!succ.first) {
-            return {false, 0};
-        }
         // successor is known to exist, no need to check
         i = succ.second;
         j = clusters[i]->Min();

@@ -67,8 +67,8 @@ int main(int argc, char** argv) {
 	for (uint32_t i = 0; i < N; ++i) {
 		auto ret1 = bst.lower_bound(out_numbers[i]);
 		auto ret2 = veb.Successor(out_numbers[i]);
-		if ((ret1 == bst.end() && ret2.first == 1) || (ret1 != bst.end() && ret2.first == 0) || (ret1 != bst.end() && ret2.first == 1 && *ret1 != ret2.second)) {			std::cout << "Successor failed for item: " << out_numbers[i] << std::endl;
-			std::cout << "Query failed for item: " << out_numbers[i] << std::endl;
+		if ((ret1 == bst.end() && ret2.first == 1) || (ret1 != bst.end() && ret2.first == 0) || (ret1 != bst.end() && ret2.first == 1 && *ret1 != ret2.second)) {
+			std::cout << "Successor failed for item: " << out_numbers[i] << std::endl;
 		}
 	}
 	for (uint32_t i = 0; i < N; ++i) {

@@ -10,8 +10,11 @@ You are provided with the following make commands...
 - `make test` - compile test.cpp for assessing VEB struct accuracy
 
 - `make benchmark` (default) - compile benchmark.cpp for evaluating time/space performance for either data structure
-- `make clean`
 
-The ./benchmark executable has required item count param for generating the set, and optional "veb" or "bst" flags to specify a data structure for modeling the set. If no flag is specified, both will be created and benchmarked. This structure isolation flag is useful for measuring space usage as maximum resident set size during the process's lifetime.
+- `make clean` - removes the executables
 
-For example, `/usr/bin/time -v ./benchmark 512000000 veb` will inform you of the time and space complexity of a Van Emde Boas Tree made representing 512 million uniform random items in the 32-bit world.
+`./benchmark N` and `./test N` both require an input `N` defining the number of items that will be generated in the set. They will be selected uniformly at random from the universe.
+
+`./benchmark` also has optional "veb" or "bst" arg to specify a data structure for modeling the set. By default, both will be created and benchmarked. This structure isolation flag is useful for measuring space usage as maximum resident set size during the process's lifetime.
+
+For example, `/usr/bin/time -v ./benchmark 512000000 veb` will inform you of the time and space complexity of a Van Emde Boas Tree made representing 512 million items.

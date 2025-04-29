@@ -11,7 +11,7 @@ You are provided with the following make commands...
 
 - `make benchmark` (default) - compile benchmark.cpp for evaluating time/space performance for either data structure
 
-- `make clean` - removes the executables
+- `make clean`
 
 `./benchmark N` and `./test N` both require an input `N` defining the number of items that will be generated in the set. They will be selected uniformly at random from the universe.
 

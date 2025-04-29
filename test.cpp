@@ -5,7 +5,7 @@
 #include <set>
 #include <chrono>
 #include <openssl/rand.h>
-#include "veb.h"
+#include "veb.hpp"
 #include <string>
 
 using namespace std::chrono;

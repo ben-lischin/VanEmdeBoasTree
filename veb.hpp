@@ -1,5 +1,5 @@
-#ifndef VEB_H
-#define VEB_H
+#ifndef VEB_HPP
+#define VEB_HPP
 
 #include <vector>
 #include <cmath>
